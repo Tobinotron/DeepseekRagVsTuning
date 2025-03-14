@@ -15,7 +15,7 @@ try:
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    # TODO: Connection does not work yet, haven't been able to figure out why
+    # Establish Connection to the server
     print(f"Connecting to {SERVER_IP}...")
     ssh.connect(
         SERVER_IP, 
@@ -23,14 +23,19 @@ try:
         password=PASSWORD, 
     )
 
+    # nohup (should) make paramiko not wait until the process is finished - not working yet
     # Setting OLLAMA_HOST=0.0.0.0 makes the Ollama accessible from computers in the same network
     # Calling ollama serve starts the ollama instance
     # > /dev/null 2>&1 & discards unneccessary output
-    # TODO: So far only tested manually (in a form that is a bit different) since python connection doesn't work yet
+    # TODO: Make sure the paramiko process finishes
     print("Connected! Running command...")
-    command = "export OLLAMA_HOST=0.0.0.0 && nohup ollama serve > /dev/null 2>&1 &"
+    command = "nohup bash -l -c 'export OLLAMA_HOST=0.0.0.0 && /home/tobias/ollama/bin/ollama serve > /dev/null 2>&1 &' &"
+ 
     stdin, stdout, stderr = ssh.exec_command(command)
+    print(stderr.read().decode('utf-8'))
     
+    # Remark: This does currently never print because the command from above never finishes
+    # Ollama does get started though
     print("Ollama started!")
     ssh.close()
 

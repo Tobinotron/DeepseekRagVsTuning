@@ -1,9 +1,9 @@
-from secrets_config.secret_variables import SERVER_IP
+from secrets_config.secret_variables import OLLAMA_HOST
 
 from ollama import Client
 
 client = Client(
-  SERVER_IP
+  OLLAMA_HOST
 )
 
 response = client.chat(model='deepseek-r1:14b', messages=[

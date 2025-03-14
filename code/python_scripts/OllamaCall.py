@@ -1,15 +1,15 @@
-from secrets import HOST as host_ip_adress
+from secrets_config.secret_variables import SERVER_IP
 
 from ollama import Client
 
 client = Client(
-  host_ip_adress
+  SERVER_IP
 )
 
 response = client.chat(model='deepseek-r1:14b', messages=[
   {
     'role': 'user',
-    'content': 'What was the last question I asked you?',
+    'content': 'Why is december not the tenth month?',
   },
 ])
 

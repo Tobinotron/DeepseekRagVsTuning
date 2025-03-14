@@ -1,5 +1,5 @@
 # Secrets
-config/secrets.py
+code/python_scripts/secrets_config/
 
 # Data Folder
 data/

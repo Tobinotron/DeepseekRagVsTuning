@@ -1,5 +1,14 @@
 # Secrets
-code/python_scripts/secrets_config/
+code/secrets_config
 
 # Data Folder
 data/
+
+# VSCode specific files
+.vscode
+
+# Cached Data
+code/server_actions/__pycache__
+code/llm_interaction/__pycache__
+code/training/__pycache__
+code/__pycache__

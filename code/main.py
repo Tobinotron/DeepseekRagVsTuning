@@ -12,7 +12,7 @@ from llm_interaction import ollama_call as ollama
 
 server.establish_connection()
 
-path_on_remote = server.push_script_to_remote("E:/Bachelor/DeepseekRagVsTuning/code/training/test.py")
+path_on_remote = server.push_script_to_remote("E:/Bachelor/DeepseekRagVsTuning/code/training/unsloth_training.py")
 server.run_script_on_remote(path_on_remote)
 
 server.terminate_connection()

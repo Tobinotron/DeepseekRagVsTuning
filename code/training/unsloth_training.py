@@ -131,23 +131,3 @@ outputs = model.generate(
 # Decode the generated tokens into human-readable text
 text = tokenizer.decode(outputs[0], skip_special_tokens=True)
 print(text) 
-
-'''
-trainer = Trainer(
-    model=model,
-    #args=training_args,
-    train_dataset=tokenized_dataset["train"],
-    # For simplicity, use the same ds for training & Testing
-    eval_dataset=tokenized_dataset["train"],
-    tokenizer=tokenizer,
-)
-trainer.train()
-
-# Evaluate the model
-eval_results = trainer.evaluate()
-print(f"Perplexity: {eval_results['perplexity']}")
-
-# Save the model and tokenizer
-model.save_pretrained("./finetuned_deepseek_r1")
-tokenizer.save_pretrained("./finetuned_deepseek_r1")'
-'''

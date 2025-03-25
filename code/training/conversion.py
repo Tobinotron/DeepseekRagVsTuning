@@ -50,6 +50,31 @@ def to_chat_template(data):
     
     return formatted_data
 
+def save_chat_template(data, file_path="data\qna_dataset\qna_formatted.json"):
+    """
+    Saves the formatted chat template data to a JSON file.
+
+    Args:
+        data (list of dict): The chat template formatted data.
+        file_path (str): The path to the file where the data will be saved.
+    """
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
+
+
+def load_chat_template(file_path):
+    """
+    Loads the chat template formatted data from a JSON file.
+
+    Args:
+        file_path (str): The path to the JSON file containing the chat template.
+
+    Returns:
+        list of dict: The loaded chat template data.
+    """
+    with open(file_path, "r", encoding="utf-8") as file:
+        return json.load(file)
+
 def get_training_data():
     with open("data\qna_dataset\qna_unprepared.json", "r", encoding="utf-8") as file:
         jsn = json.load(file)
@@ -57,7 +82,7 @@ def get_training_data():
         return chat
 
 def main():
-    print(get_training_data())
+    save_chat_template(get_training_data())
 
 if __name__ == "__main__":
     main()

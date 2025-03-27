@@ -42,7 +42,7 @@ def to_chat_template(data):
         question, answer = qa_pair
         
         formatted_data.append({
-            "messages": [
+            "conversations": [
                 {"role": "user", "content": question},
                 {"role": "assistant", "content": answer}
             ]

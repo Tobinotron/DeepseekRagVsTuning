@@ -23,6 +23,36 @@ def string_to_data(string_array):
     return data
 
 
+def qna_to_dataset(data):
+    """
+    Converts a 2D array of questions and answers into a format suitable for training deepseek with Unsloth.
+
+    Args:
+        data (list of list): A 2D list where each inner list contains [question, answer].
+
+    Returns:
+        list of dict: A list of dictionaries in the chat template format.
+    """
+    SYSTEM_PROMPT = 'Es folgt eine Frage zu einem philosophischen Thema. Beantworte diese sinnvoll.'
+    QUESTION = '\n\n### Frage: '
+    ANSWER = '\n\n### Antwort: '
+    formatted_data = []
+    
+    for qa_pair in data:
+        if len(qa_pair) != 2:
+            continue  # Skip if not question & answer
+        
+        question, answer = qa_pair
+        
+        formatted_data.append(
+            {'instruction' : question,
+             'input' : '',
+             'output' : answer,
+             'text' : SYSTEM_PROMPT + QUESTION + question + ANSWER + answer}
+        )
+    
+    return formatted_data
+
 def to_chat_template(data):
     """
     Converts a 2D array of questions and answers into a format suitable for training deepseek with Unsloth.
@@ -78,8 +108,8 @@ def load_chat_template(file_path):
 def get_training_data():
     with open("data\qna_dataset\qna_unprepared.json", "r", encoding="utf-8") as file:
         jsn = json.load(file)
-        chat = to_chat_template(string_to_data(jsn))
-        return chat
+        dataset = qna_to_dataset(string_to_data(jsn))
+        return dataset
 
 def main():
     save_chat_template(get_training_data())

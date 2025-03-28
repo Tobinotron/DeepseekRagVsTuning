@@ -3,6 +3,7 @@ code/secrets_config
 
 # Data Folder
 data/
+version_control/
 
 # VSCode specific files
 .vscode

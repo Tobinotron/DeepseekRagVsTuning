@@ -3,6 +3,7 @@ from llm_interaction import ollama_call as ollama
 
 server.establish_connection()
 #server.check_ollama_status()
+server.stop_ollama()
 server.start_ollama()
 #server.check_ollama_status()
 #server.stop_ollama()
@@ -21,5 +22,7 @@ server.start_ollama()
 path_on_remote = server.push_script_to_remote("E:/Bachelor/DeepseekRagVsTuning/code/training/unsloth_training.py")
 
 #server.run_script_on_remote(path_on_remote)
+
+#ollama.compare_responses("Was ist der sinn des Lebens?", "deepseek-r1:8b", "finetuned-deepseek-r1:8b", True)
 
 server.terminate_connection()

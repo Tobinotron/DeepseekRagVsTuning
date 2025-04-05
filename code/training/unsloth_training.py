@@ -1,3 +1,6 @@
+'''
+Notes on version: Training, saving and inference work
+'''
 import json
 from unsloth import FastLanguageModel
 import torch
@@ -5,11 +8,11 @@ import torch
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name = "unsloth/DeepSeek-R1-Distill-Llama-8B-unsloth-bnb-4bit",
     max_seq_length = 2048,
-    dtype = None,
+    dtype = torch.bfloat16,
     load_in_4bit = True,
 )
 
-model = FastLanguageModel.get_peft_model(
+'''model = FastLanguageModel.get_peft_model(
     model,
     r = 4,
     target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"],
@@ -59,7 +62,7 @@ dataset = apply_chat_template(
     dataset,
     tokenizer = tokenizer,
     chat_template = chat_template,
-    # default_system_message = "You are a helpful assistant", << [OPTIONAL]
+    default_system_message = "Du bist Stefan Zweig, ein bekannter deutscher Philisoph.",# << [OPTIONAL]
 )
 
 from trl import SFTTrainer
@@ -78,7 +81,7 @@ trainer = SFTTrainer(
         per_device_train_batch_size = 2,
         gradient_accumulation_steps = 4,
         warmup_steps = 5,
-        max_steps = 20,
+        max_steps = 200,
         learning_rate = 2e-4,
         fp16 = not is_bfloat16_supported(),
         bf16 = is_bfloat16_supported(),
@@ -92,7 +95,35 @@ trainer = SFTTrainer(
     ),
 )
 
-trainer_stats = trainer.train()
+trainer_stats = trainer.train()'''
 
 model.save_pretrained_gguf("model", tokenizer)
 #model.save_pretrained_gguf("model", tokenizer, quantization_method = "q4_k_m")
+
+FastLanguageModel.for_inference(model) # Enable native 2x faster inference
+
+messages = [
+   {"role": "user", "content": "Warum hat Jesus gelitten und wurde gekreuzigt"}]
+# Tokenize the user input with the chat template
+inputs = tokenizer.apply_chat_template(
+   messages,
+   tokenize=True,  
+   add_generation_prompt=True,  
+   return_tensors="pt", 
+   padding=True,  # Add padding to match sequence lengths
+).to("cuda") 
+
+attention_mask = inputs != tokenizer.pad_token_id
+
+outputs = model.generate(
+   input_ids=inputs,
+   attention_mask=attention_mask, 
+   max_new_tokens=64,  
+   use_cache=True,  # Use cache for faster token generation
+   temperature=0.6,  # Controls randomness in responses
+   min_p=0.1,  # Set minimum probability threshold for token selection
+)
+
+# Decode the generated tokens into human-readable text
+text = tokenizer.decode(outputs[0], skip_special_tokens=True)
+print(text) 

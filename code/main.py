@@ -1,10 +1,12 @@
 from server_actions import remote_server as server
 from llm_interaction import ollama_call as ollama
+from llm_interaction import rag_call as rag
+
 
 server.establish_connection()
 #server.check_ollama_status()
-server.stop_ollama()
-server.start_ollama()
+#server.stop_ollama()
+#server.start_ollama()
 #server.check_ollama_status()
 #server.stop_ollama()
 #server.check_ollama_status()
@@ -19,7 +21,12 @@ server.start_ollama()
 
 #server.push_script_to_remote("E:/Bachelor/DeepseekRagVsTuning/data/qna_dataset/deepseek_data.json")
 
-path_on_remote = server.push_script_to_remote("E:/Bachelor/DeepseekRagVsTuning/code/training/unsloth_training.py")
+#path_on_remote = server.push_script_to_remote("E:/Bachelor/DeepseekRagVsTuning/code/training/unsloth_training.py")
+
+server.start_ollama()
+rag_prompt = rag.build_system_prompt("Was ist der Sinn des Lebens?")
+print(ollama.send_message(rag_prompt))
+server.stop_ollama()
 
 #server.run_script_on_remote(path_on_remote)
 

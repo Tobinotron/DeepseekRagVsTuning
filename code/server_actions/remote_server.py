@@ -86,6 +86,10 @@ def stop_ollama():
      
      print("Ollama stopped!")
 
+def execute_command_on_remote(command):
+    stdin, stdout, stderr = ssh.exec_command(command)
+    return stdin, stdout, stderr
+
 def push_script_to_remote(local_script_path, remote_folder="~/py_scripts"):
     """
     Transfers a local script to a specified folder on the remote server.

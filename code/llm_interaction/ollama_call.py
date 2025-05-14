@@ -7,7 +7,7 @@ client = Client(
   OLLAMA_HOST
 )
 
-def send_message(message, model='deepseek-r1:14b'):
+def send_message(message, model='deepseek-r1:8b'):
   """
     Sends a chat request to the Ollama API using the provided client.
 

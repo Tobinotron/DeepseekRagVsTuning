@@ -12,7 +12,7 @@ model, tokenizer = FastLanguageModel.from_pretrained(
     load_in_4bit = True,
 )
 
-'''model = FastLanguageModel.get_peft_model(
+model = FastLanguageModel.get_peft_model(
     model,
     r = 4,
     target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"],
@@ -33,7 +33,7 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 #    dataset = json.load(file)
 
 from datasets import load_dataset
-dataset = load_dataset('json', data_files='qna_formatted.json', split = "train")
+dataset = load_dataset('json', data_files='/home/tobias/py_scripts/bruder_david_training_data.json', split = "train")
 print(dataset.column_names)
 
 from unsloth import to_sharegpt
@@ -95,7 +95,7 @@ trainer = SFTTrainer(
     ),
 )
 
-trainer_stats = trainer.train()'''
+trainer_stats = trainer.train()
 
 model.save_pretrained_gguf("model", tokenizer)
 #model.save_pretrained_gguf("model", tokenizer, quantization_method = "q4_k_m")

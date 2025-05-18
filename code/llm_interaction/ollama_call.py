@@ -2,6 +2,7 @@ from secrets_config.secret_variables import OLLAMA_HOST
 
 import re
 from ollama import Client
+from llm_interaction import rag_call as rag
 
 client = Client(
   OLLAMA_HOST
@@ -27,6 +28,9 @@ def send_message(message, model='deepseek-r1:8b'):
   ])
 
   return response['message']['content']
+
+def send_rag_message(message, model='deepseek-r1:8b'):
+  return send_message(rag.build_system_prompt(message), model)
 
 def compare_responses(message, model1, model2, disable_thinking=False):
   response1 = send_message(message, model1)

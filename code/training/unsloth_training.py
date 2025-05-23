@@ -1,9 +1,10 @@
 '''
-Notes on version: Training, saving and inference work
+Notes on version: works, generally
 '''
 import json
 from unsloth import FastLanguageModel
 import torch
+from datasets import Dataset
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name = "unsloth/DeepSeek-R1-Distill-Llama-8B-unsloth-bnb-4bit",
@@ -34,7 +35,11 @@ model = FastLanguageModel.get_peft_model(
 
 from datasets import load_dataset
 dataset = load_dataset('json', data_files='/home/tobias/py_scripts/bruder_david_training_data.json', split = "train")
-print(dataset.column_names)
+
+# Split the dataset
+train_data_split = dataset.train_test_split(test_size=0.1, seed=42)
+train_data = train_data_split['train']
+eval_data = train_data_split['test']
 
 from unsloth import to_sharegpt
 from unsloth import standardize_sharegpt
@@ -43,7 +48,7 @@ dataset = to_sharegpt(
     dataset,
     merged_prompt = "{instruction}[[\nYour input is:\n{input}]]",
     output_column_name = "output",
-    conversation_extension = 3, # Select more to handle longer conversations
+    conversation_extension = 3,
 )
 
 dataset = standardize_sharegpt(dataset)
@@ -62,7 +67,7 @@ dataset = apply_chat_template(
     dataset,
     tokenizer = tokenizer,
     chat_template = chat_template,
-    default_system_message = "Du bist Stefan Zweig, ein bekannter deutscher Philisoph.",# << [OPTIONAL]
+    default_system_message = "Du bist Stefan Zweig, ein bekannter deutscher Philisoph.",
 )
 
 from trl import SFTTrainer
@@ -72,7 +77,8 @@ from unsloth import is_bfloat16_supported
 trainer = SFTTrainer(
     model = model,
     tokenizer = tokenizer,
-    train_dataset = dataset,
+    train_dataset = train_data,
+    eval_dataset = eval_data,
     dataset_text_field = "text",
     max_seq_length = 2048,
     dataset_num_proc = 2,
@@ -81,17 +87,24 @@ trainer = SFTTrainer(
         per_device_train_batch_size = 2,
         gradient_accumulation_steps = 4,
         warmup_steps = 5,
-        max_steps = 200,
+        #max_steps = 20,
+        num_train_epochs = 3,
         learning_rate = 2e-4,
         fp16 = not is_bfloat16_supported(),
         bf16 = is_bfloat16_supported(),
-        logging_steps = 1,
+        #logging_steps = 1,
+        logging_steps = 10,
         optim = "adamw_8bit",
         weight_decay = 0.01,
-        lr_scheduler_type = "linear",
+        #lr_scheduler_type = "linear",
+        lr_scheduler_type = "cosine",
         seed = 3407,
         output_dir = "outputs",
-        report_to = "none", # Use this for WandB etc
+        report_to = "none",
+        load_best_model_at_end = True,
+        metric_for_best_model = "eval_loss",
+        save_strategy = "epoch",
+        evaluation_strategy = "epoch",
     ),
 )
 

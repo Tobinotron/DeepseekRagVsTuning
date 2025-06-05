@@ -48,5 +48,12 @@ def compare_responses(message, model1, model2, disable_thinking=False):
   print(f"Response from {model2}:\n{response2}")
   print("="*80)
 
+def embed(msg):
+  embedding = client.embed(model="mxbai-embed-large", input=msg)
+  return embedding["embeddings"][0]
+
 def emit_thinking(text):
+  """
+  Removes content enclosed within <think> and </think> tags from a string.
+  """
   return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)

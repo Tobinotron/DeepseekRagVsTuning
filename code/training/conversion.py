@@ -1,5 +1,8 @@
+import os
 import re
 import json
+
+from llm_interaction.ollama_call import emit_thinking
 
 def string_to_data(string_array):
     """
@@ -110,6 +113,44 @@ def get_training_data():
         jsn = json.load(file)
         dataset = qna_to_dataset(string_to_data(jsn))
         return dataset
+
+def unthink_dataset(path):
+  """
+  Reads a JSON file, applies the emit_thinking function to every string field,
+  and saves the modified JSON to a new file with the suffix "_no_think".
+
+  Args:
+    path (str): The filepath of the input JSON file.
+  """
+  try:
+    with open(path, 'r', encoding='utf-8') as f:
+      dataset = json.load(f)
+  except FileNotFoundError:
+    print(f"Error: The file '{path}' was not found.")
+    return
+
+  modified_dataset = []
+  for item in dataset:
+      modified_item = {}
+      for key, value in item.items():
+        if isinstance(value, str):
+          modified_item[key] = emit_thinking(value)
+        else:
+          modified_item[key] = value
+      modified_dataset.append(modified_item)
+
+  # Construct the new filename
+  directory, filename = os.path.split(path)
+  name_without_extension, extension = os.path.splitext(filename)
+  new_filename = f"{name_without_extension}_no_think{extension}"
+  new_filepath = os.path.join(directory, new_filename)
+
+  try:
+    with open(new_filepath, 'w', encoding='utf-8') as f:
+      json.dump(modified_dataset, f, indent=4, ensure_ascii=False)
+    print(f"Successfully processed '{path}' and saved the modified dataset to '{new_filepath}'.")
+  except IOError as e:
+    print(f"Error: Could not write the modified file to '{new_filepath}'. Reason: {e}")
 
 def main():
     save_chat_template(get_training_data())

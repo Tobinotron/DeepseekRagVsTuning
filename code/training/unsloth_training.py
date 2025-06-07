@@ -22,15 +22,15 @@ elif param_model == "unsloth/DeepSeek-R1-Distill-Qwen-14B-unsloth-bnb-4bit":
     print("Training Deepseek 14B Model")
     param_lora_alpha = 64
     param_r = 64
-    param_max_seq_length = 2048
+    param_max_seq_length = 4096
     param_batch_size = 1
-    param_gradient_accumulation_steps = 16
+    param_gradient_accumulation_steps = 8
 else:
     print("Invalid model given. Aborting training")
     raise ValueError("Unsupported model specified.")
 
 #### GLOBAL PARAMS ####
-param_epochs = 5
+param_epochs = 3
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name = param_model,

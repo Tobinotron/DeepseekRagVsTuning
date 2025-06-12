@@ -5,6 +5,7 @@ from datetime import datetime
 
 from llm_interaction import ollama_call as ollama
 from server_actions import remote_server as server
+from llm_interaction import rag_call as rag
 
 def generate_rag_training_data(file_path, prompt_count, variations, offset=0):
     """
@@ -40,7 +41,10 @@ def generate_rag_training_data(file_path, prompt_count, variations, offset=0):
             input_text = entry["input"]
 
             for _ in range(variations):
-                rag_output = ollama.send_rag_message(instruction)
+                # UNCOMMENT FOR LOCAL RAG
+                #rag_output = ollama.send_rag_message(instruction)
+                # UNCOMMENT FOR OPENAI RAG
+                rag_output = rag.get_open_ai_response(instruction)
                 new_entry = {
                     "instruction": instruction,
                     "input": input_text,
@@ -48,10 +52,14 @@ def generate_rag_training_data(file_path, prompt_count, variations, offset=0):
                     "text": f"Es folgt eine Frage zu einem philosophischen Thema. Beantworte diese sinnvoll.\n\n### Frage: {instruction}\n\n### Antwort: {rag_output}"
                 }
                 augmented_data.append(new_entry)
-        except:
+        except Exception as e:
+            print(e)
             save_data(file_path, i, variations, offset, augmented_data, "_failed")
             server.establish_connection()
             time.sleep(5)
+        
+        if i % 200 == 0:
+            save_data(file_path, i, variations, offset, augmented_data, "_checkpoint")
         
         end_time = time.time()
         total_time = end_time - start_time
@@ -89,14 +97,15 @@ def main():
     server.start_ollama()
 
     file_path = "data/qna_dataset/qna_formatted.json"
-    prompt_count = 1000
-    variations = 5
+    prompt_count = 100
+    variations = 2
     offset = 0
     generate_rag_training_data(file_path, prompt_count, variations, offset)
 
     server.stop_ollama()
     server.terminate_connection()
 
+# For merging multiple files
 def main2():
     files = [
         "data/qna_dataset/qna_formatted_0-100x5_20250516_164244.json",
@@ -111,4 +120,4 @@ def main2():
     merge_json_files(files, out_file_name)
 
 if __name__ == "__main__":
-    main2()
+    main()

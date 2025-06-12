@@ -1,4 +1,4 @@
-from secrets_config.secret_variables import RAG_URL, RAG_KEY, SYSTEM_PROMPT_BASE
+from secrets_config.secret_variables import RAG_URL, RAG_KEY, SYSTEM_PROMPT_BASE, OPEN_AI_URL, OPEN_AI_KEY
 
 from server_actions import remote_server as server
 
@@ -96,6 +96,24 @@ def get_rag_response(message, application="bruder-david", character="8", locale=
     
     stdin, stdout, stderr = server.execute_command_on_remote(rag_call)
     return stdout.read().decode().strip()
+
+def get_open_ai_response(message, application="bruder-david", character="8", locale="de", user_name="felix", length=1):
+    rag_call = ("curl '" + OPEN_AI_URL + "get-response?"
+                + "message=" + message.replace(" ", "%20")
+                + "&application=" + application
+                + "&character=" + character
+                + "&locale=" + locale
+                + "&user_name=" + user_name
+                + "&response_length=" + str(length)
+                + "' -H 'Authorization: Bearer " + OPEN_AI_KEY + "'")
+    
+    stdin, stdout, stderr = server.execute_command_on_remote(rag_call)
+    raw_response = stdout.read().decode().strip()
+    #print(raw_response)
+
+    response_json = json.loads(raw_response)
+    messages = response_json.get("messages", [])
+    return " ".join(messages)
 
 def build_system_prompt(message, application="bruder-david", character="8", locale="de", source_num=2, quote_num=2, safeguard_num=4):
     """

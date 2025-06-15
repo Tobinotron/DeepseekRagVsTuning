@@ -41,7 +41,7 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 
 model = FastLanguageModel.get_peft_model(
     model,
-    target_modules = ["q_proj","v_proj","k_proj","o_proj","gate_proj","down_proj","up_proj", "lm_head"],
+    target_modules = ["q_proj","v_proj","k_proj","o_proj","gate_proj","down_proj","up_proj"], #head temporär auskommentiert
     lora_alpha=param_lora_alpha,
     lora_dropout=0,
     r=param_r,
@@ -64,7 +64,8 @@ from unsloth import to_sharegpt
 from unsloth import standardize_sharegpt
 from unsloth import apply_chat_template
 
-dataset = load_dataset('json', data_files='/home/tobias/py_scripts/bruder_david_training_data_no_think.json', split = "train")
+#dataset = load_dataset('json', data_files='/home/tobias/py_scripts/bruder_david_training_data_no_think.json', split = "train")
+dataset = load_dataset('json', data_files='/home/tobias/py_scripts/david_openai_training_data.json', split = "train")
 
 # Since you never have an 'input' field, the merged_prompt is simply the instruction.
 my_merged_prompt_template = "{instruction}"

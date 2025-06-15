@@ -7,7 +7,8 @@ from llm_interaction import rag_call as rag
 from server_actions import remote_server as server
 from tests import benchmarks
 
-
+from transformers import AutoTokenizer
+tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/deepseek-llm-7b-base", trust_remote_code=True)
 
 prompt_list = [] # Input-output tuples
 
@@ -66,7 +67,7 @@ def compare_chatbots(iters=5):
                     modified_prompt = "Du bist Bruder David Steindl-Rast. Beantworte folgende Frage: " + prompt
 
                 rag_length = len(modified_prompt) - len(prompt)
-                full_prompt_length = len(modified_prompt)
+                full_prompt_length = len(tokenizer(modified_prompt)["input_ids"])
 
                 best_response = ""
                 best_response_score = -1.0
@@ -84,6 +85,8 @@ def compare_chatbots(iters=5):
                     response = ollama.send_message(modified_prompt, model)
                     response_time += time.time() - start_time
 
+                    total_response_length += len(tokenizer(response)["input_ids"])
+
                     response = ollama.emit_thinking(response)
 
                     current_sem_score = benchmarks.get_sem_score(response, expected_output)
@@ -91,7 +94,6 @@ def compare_chatbots(iters=5):
                     overlap_score += benchmarks.get_overlap_score(response, expected_output)
                     lang_score += benchmarks.get_lang_score(response)
 
-                    total_response_length += len(response)
 
                     if current_sem_score >= best_response_score:
                         best_response = response
@@ -160,7 +162,9 @@ def compare_responses(message):
         overlap_score = 0.0
         lang_score = 0.0
 
-        start_time = time.time()
+        print(ollama.get_ollama_response_with_metrics(modified_prompt, model=model))
+
+        """start_time = time.time()
         response = ollama.send_message(modified_prompt, model)
         response_time = time.time() - start_time
         total_time = rag_time + response_time
@@ -175,7 +179,7 @@ def compare_responses(message):
         print(f"Generation took {total_time:.4f} seconds.")
         if do_rag:
             print(f"Generation without RAG would have taken {response_time:.4f} seconds.")
-        print(f"Semantic score: {sem_score:.4f}, Overlap score: {overlap_score:.4f}, Language score: {lang_score:.4f}")
+        print(f"Semantic score: {sem_score:.4f}, Overlap score: {overlap_score:.4f}, Language score: {lang_score:.4f}")"""
         
 
 def main():
@@ -184,7 +188,7 @@ def main():
         server.establish_connection()
         server.stop_ollama()
         server.start_ollama()
-        compare_chatbots(iters=10)
+        compare_chatbots(iters=5)
     except:
         server.stop_ollama()
         server.terminate_connection()
@@ -193,13 +197,13 @@ def main():
     server.terminate_connection()
 
 if __name__ == "__main__":
-    main()
-    """try:
+    #main()
+    try:
         server.establish_connection()
         server.stop_ollama()
         server.start_ollama()
-        compare_responses("Wer bist du?")
+        compare_responses("Halo, wer bist du?")
     except Exception as e:
         print(e)
 
-    server.terminate_connection()"""
+    server.terminate_connection()

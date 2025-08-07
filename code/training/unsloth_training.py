@@ -41,7 +41,7 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 
 model = FastLanguageModel.get_peft_model(
     model,
-    target_modules = ["q_proj","v_proj","k_proj","o_proj","gate_proj","down_proj","up_proj"], #head temporär auskommentiert
+    target_modules = ["q_proj","v_proj","k_proj","o_proj","gate_proj","down_proj","up_proj"],
     lora_alpha=param_lora_alpha,
     lora_dropout=0,
     r=param_r,
@@ -52,58 +52,42 @@ model = FastLanguageModel.get_peft_model(
     loftq_config = None,
 )
 
-#from datasets import load_dataset
-#dataset = load_dataset("vicgalle/alpaca-gpt4", split = "train")
-#print(dataset.column_names)
-
-#with open("qna_formatted.json", "r", encoding="utf-8") as file:
-#    dataset = json.load(file)
+file_path = '/home/tobias/py_scripts/david_openai_training_data.json'
 
 from datasets import load_dataset
 from unsloth import to_sharegpt
 from unsloth import standardize_sharegpt
 from unsloth import apply_chat_template
 
-#dataset = load_dataset('json', data_files='/home/tobias/py_scripts/bruder_david_training_data_no_think.json', split = "train")
-dataset = load_dataset('json', data_files='/home/tobias/py_scripts/david_openai_training_data.json', split = "train")
+dataset = load_dataset('json', data_files=file_path, split = "train")
 
-# Since you never have an 'input' field, the merged_prompt is simply the instruction.
-my_merged_prompt_template = "{instruction}"
-
-# Convert your dataset to ShareGPT format ('conversations' column)
+# Convert the dataset to ShareGPT format
 dataset = to_sharegpt(
     dataset,
-    merged_prompt = my_merged_prompt_template,
-    output_column_name = "output", # This maps your 'output' column to the assistant's response
-    # conversation_extension = 3, # Keep this if it's working for your desired conversation length
-    # If your data is strictly single-turn instruction/response, this might not be strictly needed,
-    # but unsloth's default handling is usually fine.
+    merged_prompt = "instruction",
+    output_column_name = "output"
 )
+#dataset = standardize_sharegpt(dataset)
 
-# Standardize the ShareGPT format (e.g., ensures "from": "human" becomes "role": "user")
-dataset = standardize_sharegpt(dataset)
+seed = 42
 
 # Split the dataset
-train_data_split = dataset.train_test_split(test_size=0.1, seed=42)
+train_data_split = dataset.train_test_split(test_size=0.1, seed=seed)
 train_data = train_data_split['train']
 eval_data = train_data_split['test']
 
 DEFAULT_SYSTEM_MESSAGE = "Du bist Stefan Zweig, ein bekannter deutscher Philosoph und Schriftsteller."
 
-# Apply chat template to both training and evaluation datasets
-# Call apply_chat_template as a standalone function from unsloth
-train_data = apply_chat_template( # <--- CORRECTED CALL
+# Apply the default DeepSeek-R1 chat template to datasets
+train_data = apply_chat_template(
     train_data,
     tokenizer = tokenizer,
-    # No need for chat_template arg here if you want the tokenizer's default
-    # which is what DeepSeek-R1 expects for its native chat format.
     default_system_message = DEFAULT_SYSTEM_MESSAGE,
 )
 
-eval_data = apply_chat_template( # <--- CORRECTED CALL
+eval_data = apply_chat_template(
     eval_data,
     tokenizer = tokenizer,
-    # No need for chat_template arg here
     default_system_message = DEFAULT_SYSTEM_MESSAGE,
 )
 

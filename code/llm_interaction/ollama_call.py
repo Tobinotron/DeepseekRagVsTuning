@@ -29,6 +29,22 @@ def send_message(message, model='deepseek-r1:8b'):
 
   return response['message']['content']
 
+def get_ollama_response_with_metrics(message, model='deepseek-r1:8b'):
+    response = client.chat(
+        model=model,
+        messages=[
+            {
+                'role': 'user',
+                'content': message,
+            },
+        ],
+        options={
+            'num_ctx': 4096,
+        }
+    )
+
+    return response
+
 def send_rag_message(message, model='deepseek-r1:8b'):
   return send_message(rag.build_system_prompt(message), model)
 

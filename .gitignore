@@ -1,8 +1,9 @@
 # Secrets
 code/secrets_config
 
-# Data Folder
-data/
+# Data etc.
+data/*
+plots/data/old
 version_control/
 
 # VSCode specific files

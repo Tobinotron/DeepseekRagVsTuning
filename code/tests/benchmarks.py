@@ -1,6 +1,6 @@
 import numpy as np
 import langdetect
-import difflib
+
 
 from llm_interaction.ollama_call import embed
 
@@ -42,6 +42,8 @@ def get_sem_score(input1, input2):
 
     return cosine_similarity(embedding1, embedding2)
 
+import langdetect
+
 def get_lang_score(input):
     languages = langdetect.detect_langs(input)
 
@@ -52,6 +54,8 @@ def get_lang_score(input):
             break # Exit loop once 'de' is found
     
     return de_probability
+
+import difflib
 
 def get_overlap_score(input1, input2):
     sm = difflib.SequenceMatcher(None, input1, input2)
